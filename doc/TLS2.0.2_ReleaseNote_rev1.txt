@@ -1,0 +1,106 @@
+# Release Note TLS2.0
+
+## Table of contents
+
+1. [Hardware's specification](#specification)
+2. [What's available](#available)
+3. [Changes](#changes)
+
+
+## 1. Hardware's specification
+
+### Hardware requirement
+
+* 6th generation Intel® CoreTM processor onwards OR
+  6th generation Intel® Xeon® processor onwards
+* Ubuntu OS 18.04 and above
+* Kernel 4.18 and above
+* RAM 32GB and above
+
+
+## 2. What's available
+
+### Login Page
+
+* Sign in with user's unique credentials
+
+### Dashboard
+
+* Dispaly detaild hardware,system and OS information
+* Project list
+
+### Dataset Preparation
+
+* Images Upload 
+* Label Creation
+* Computer Vision Annotation Tool Integrated
+
+### Model Training
+
+* Model Available:
+  * Classification
+    * Xception
+    * VGG16
+    * VGG19
+    * ResNet
+    * InceptionV3
+    * Inception ResNetV2
+    * MobileNet
+    * MobileNetV2
+    * DenseNet
+    * NASNet
+    * Lenet 5
+    * GoogleNet
+  * Object Detection
+    * SSD Mobilenet v1
+    * SSD Mobilenet v2
+    * SSD Inception v2
+    * Faster RCNN Inception v2
+    * Faster RCNN Resnet50
+    * Faster RCNN Resnet101
+    * Faster RCNN Inception Resnet v2
+    * Faster RCNN NAS
+    * YoloV3
+  * Segmentation
+    * Mask RCNN Inception Resnet v2
+    * Mask RCNN Inception v2
+    * Mask RCNN Resnet50
+    * Mask RCNN Resnet101
+  * Autoencoder
+
+
+* Start and queue training
+* Keep track on model training progress
+* Adjust training dataset spliting between training, validation and testing
+* Generate additional samples by augmentation
+* Adjust model training parameters (for advance user)
+* Visualisation of training metrics (Graph, mean and standard deviation)
+* Confusion metrix
+* Downloading of trained standard model
+* Downloading of OpenVINO IR model in FP16 and FP32 format (optimised with default OpenVINO parameters)
+
+### Remote inferencing
+
+* Adding of remote agent (EII enabled system)
+* Deployment of trained model to EIS system through remote agent
+* View EII inferencing result from TLS web UI
+
+### Local inferencing
+
+* Test trained model on an uploaded image locally
+* Adjust threshold limit to test inferencing result
+
+
+## 3. Changes History
+
+### TLS2.0.2 Changes
+* Updated resnet50 trainer configuration.
+* Updated YoloV3 trainer configuration and fixed training issue.
+* Fixed RDB write error for Redis.
+
+### TLS2.0.1 Changes
+* Fixed native environment setup.
+* Fixed image annotation on labelling synchronization with backend database.
+* Fixed confusion matrix ratio calculation.
+* Fixed containers do not start after reboot. 
+* Fixed training memory leak bug. 

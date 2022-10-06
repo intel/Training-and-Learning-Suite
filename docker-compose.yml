@@ -1,0 +1,362 @@
+# Copyright (c) 2020 Intel Corporation.
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+version: "3.6"
+
+services:
+  tls_redis:
+    image: redis-tls:2.0
+    container_name: tls_redis
+    read_only: false
+    build:
+      context: .
+      dockerfile: tlsredis.Dockerfile
+      args:
+        user: "tls"
+    security_opt:
+      - no-new-privileges
+    expose:
+      - "6379"
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - default
+    volumes:
+      - redis_data:/data
+      - redis_etc:/etc/redis
+    restart: unless-stopped
+    environment:
+      - PYTHONIOENCODING="utf-8"
+    secrets:
+      - ca_tls
+      - redis_cert
+      - redis_key
+      - redis_pass
+
+  tls_mongo:
+    image: mongo:4.4
+    container_name: tls_mongo
+    read_only: false
+    volumes:
+      - mongo_tmp:/tmp
+      - mongo_data:/data/db
+      - ./conf/mongo/create-user.js:/docker-entrypoint-initdb.d/create-user.js:ro
+    expose:
+      - "27017"
+    ports:
+      - "127.0.0.1:27017:27017"
+    networks:
+      - default
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges
+    command:
+      - "--tlsMode=allowTLS"
+      - "--tlsCertificateKeyFile=/run/secrets/mongodb_key"
+      - "--tlsCAFile=/run/secrets/ca_tls"
+      - "--tlsAllowConnectionsWithoutCertificates"
+    environment:
+      - MONGO_INITDB_DATABASE=tls20
+      - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongodb_user
+      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongodb_pass
+    secrets:
+      - ca_tls
+      - mongodb_pass
+      - mongodb_user
+      - mongodb_key
+
+  tls_rabbitmq:
+    image: tls_rabbitmq-mqtt:2.0
+    container_name: tls_rabbitmq
+    read_only: true
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+      - "15672:15672"
+    build:
+      context: .
+      dockerfile: tlsrabbitmq.Dockerfile
+    security_opt:
+      - no-new-privileges
+    restart: unless-stopped
+    volumes:
+      - rabbitmq_data:/var/log
+    secrets:
+      - ca_tls
+      - rabbitmq_cert
+      - rabbitmq_key
+      - mqtt_user
+      - mqtt_pwd
+
+  tls_proxy:
+    image: tlsnginx:2.0
+    container_name: tls_proxy
+    depends_on:
+      - tls_apiui
+      - tls_core
+    read_only: true
+    build:
+      context: .
+      dockerfile: tlsproxy.Dockerfile
+    security_opt:
+      - no-new-privileges
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    volumes:
+      - proxy_data:/etc/nginx
+      - proxy_tmp:/tmp
+      - proxy_log:/var/log
+    networks:
+      - default
+      - cvat_cvat
+    environment:
+      - CVAT_URL=http://traefik:8080
+      - TLS_API_URL=https://tls_apiui:1337
+      - TLS_UI_URL=http://tls_apiui:3000
+    secrets:
+      - ca_tls
+      - tlsserver_cert
+      - tlsserver_key
+
+  tls_apiui:
+    image: tlsapiui:2.0
+    depends_on:
+      - tls_mongo
+      - tls_redis
+    read_only: false
+    build:
+      context: .
+      args:
+        http_proxy:
+        https_proxy:
+        no_proxy:
+        socks_proxy:
+        user: "tls"
+        uid: "1688"
+      dockerfile: tlsapiui.Dockerfile
+    security_opt:
+      - no-new-privileges
+    restart: unless-stopped
+    container_name: tls_apiui
+    volumes:
+      - tmp_data:/tmp
+      - dataset_data:/home/tls/webservices/apiserver/datasets
+      - dataset_train_data:/home/tls/nnframework/tf/data
+    expose:
+      - "1337"
+      - "3000"
+    networks:
+      - default
+      - cvat_cvat
+    environment:
+      - CVAT_URL=http://traefik:8080/api
+      - TLS_USER_FILE=/run/secrets/tlsapiui_user
+      - TLS_PWD_FILE=/run/secrets/tlsapiui_pass
+      - REDIS_HOST=tls_redis
+      - REDIS_PASS=/run/secrets/redis_pass
+      - MONGO_HOST=tls_mongo
+      - MONGO_USER_FILE=/run/secrets/mongodb_user
+      - MONGO_PWD_FILE=/run/secrets/mongodb_pass
+      - MONGO_KEY_FILE=/run/secrets/mongodb_key
+      - CA_CERT=/run/secrets/ca_tls
+      - MQTT_USER_FILE=/run/secrets/mqtt_user
+      - MQTT_PWD_FILE=/run/secrets/mqtt_pwd
+    secrets:
+      - ca_tls
+      - tlsapiui_cert
+      - tlsapiui_key
+      - tlsapiui_user
+      - tlsapiui_pass
+      - tlsserver_cert
+      - tlsserver_key
+      - mongodb_pass
+      - mongodb_user
+      - mongodb_key
+      - redis_pass
+      - mqtt_user
+      - mqtt_pwd
+
+  tls_core:
+    image: tlscore:2.0
+    depends_on:
+      - tls_mongo
+      - tls_redis
+      - tls_openvino
+      - tls_rabbitmq
+    read_only: false
+    build:
+      context: .
+      args:
+        http_proxy:
+        https_proxy:
+        no_proxy:
+        socks_proxy:
+        user: "tls"
+        uid: "1688"
+      dockerfile: tlscore.Dockerfile
+    security_opt:
+      - no-new-privileges
+    restart: unless-stopped
+    container_name: tls_core
+    networks:
+      - default
+    volumes:
+      - tf_tmp_data:/tmp
+      - openvino:/opt/intel/openvino
+      - dataset_data:/home/tls/webservices/apiserver/datasets
+      - dataset_train_data:/home/tls/nnframework/tf/data
+    environment:
+      - REDIS_HOST=tls_redis
+      - REDIS_PASS=/run/secrets/redis_pass
+      - MQTT_HOST=tls_rabbitmq
+      - MQTT_USER_FILE=/run/secrets/mqtt_user
+      - MQTT_PWD_FILE=/run/secrets/mqtt_pwd
+      - MONGO_HOST=tls_mongo
+      - MONGO_USER_FILE=/run/secrets/mongodb_user
+      - MONGO_PWD_FILE=/run/secrets/mongodb_pass
+      - SSL_KEYFILE=/run/secrets/tlscore_key
+      - SSL_CERTFILE=/run/secrets/tlscore_cert
+      - SSL_CACERTS=/run/secrets/ca_tls
+    secrets:
+      - ca_tls
+      - tlscore_cert
+      - tlscore_key
+      - redis_pass
+      - mqtt_user
+      - mqtt_pwd
+      - mongodb_pass
+      - mongodb_user
+
+  tls_openvino:
+    image: openvino/ubuntu18_dev:2021.4.2
+    container_name: tls_openvino
+    read_only: true
+    security_opt:
+      - no-new-privileges
+    volumes:
+      - openvino:/opt/intel/openvino
+
+volumes:
+  openvino:
+  proxy_tmp:
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/intel/tls/proxy/tmp
+  proxy_data:
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/intel/tls/proxy/etc
+  proxy_log:
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/intel/tls/proxy/log
+  redis_data:
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/intel/tls/redis
+  redis_etc:
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/intel/tls/redis_etc
+  mongo_tmp:
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/intel/tls/mongodb/tmp
+  mongo_data:
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/intel/tls/mongodb/data
+  dataset_data:
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/intel/tls/dataset
+  dataset_train_data:
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/intel/tls/datatrain
+  tf_tmp_data:
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/intel/tls/tmp_tf
+  tmp_data:
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/intel/tls/tmp
+  rabbitmq_data:
+    driver_opts:
+      type: none
+      o: bind
+      device: /opt/intel/tls/rabbitmq
+
+networks:
+  cvat_cvat:
+    external: true
+
+secrets:
+  ca_tls:
+    file: thirdparty/security/ca/ca_certificate.pem
+  tlscore_cert:
+    file: thirdparty/security/TLS_core_cert.crt
+  tlscore_key:
+    file: thirdparty/security/TLS_core_key.pem
+  tlsapiui_user:
+    file: thirdparty/security/TLS_apiui_username.txt
+  tlsapiui_pass:
+    file: thirdparty/security/TLS_apiui_pass.txt
+  tlsapiui_cert:
+    file: thirdparty/security/TLS_apiui_cert.crt
+  tlsapiui_key:
+    file: thirdparty/security/TLS_apiui_key.pem
+  tlsserver_cert:
+    file: thirdparty/security/TLS_server_cert.crt
+  tlsserver_key:
+    file: thirdparty/security/TLS_server_key.pem
+  mongodb_key:
+    file: thirdparty/security/TLS_mongodb.pem
+  mongodb_pass:
+    file: thirdparty/security/TLS_mongodb_pass.txt
+  mongodb_user:
+    file: thirdparty/security/TLS_mongodb_username.txt
+  rabbitmq_cert:
+    file: thirdparty/security/TLS_rabbitmq_cert.crt
+  rabbitmq_key:
+    file: thirdparty/security/TLS_rabbitmq_key.pem
+  redis_cert:
+    file: thirdparty/security/TLS_redis_cert.crt
+  redis_key:
+    file: thirdparty/security/TLS_redis_key.pem
+  redis_pass:
+    file: thirdparty/security/TLS_redis_pass.txt
+  mqtt_user:
+    file: thirdparty/security/TLS_mqtt_username.txt
+  mqtt_pwd:
+    file: thirdparty/security/TLS_mqtt_pass.txt

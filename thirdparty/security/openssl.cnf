@@ -1,0 +1,38 @@
+[ ca ]
+default_ca = tlsca
+
+[ tlsca ]
+default_crl_days = 30
+default_days     = 365
+default_md       = sha256
+policy          = tlsca_policy
+
+[ tlsca_policy ]
+commonName = supplied
+stateOrProvinceName = optional
+countryName = optional
+emailAddress = optional
+organizationName = optional
+organizationalUnitName = optional
+domainComponent = optional
+
+[ req ]
+default_bits       = 4096
+default_md         = sha256
+prompt             = yes
+distinguished_name = tlsca_distinguished_name
+x509_extensions    = tlsca_extensions
+
+[ tlsca_distinguished_name ]
+countryName                = Country Name (2 letter code)
+countryName_default        = MY
+countryName_min            = 2
+countryName_max            = 2
+commonName                 = Common Name (FQDN)
+0.organizationName         = Organization Name (eg, company)
+0.organizationName_default = tlsca
+
+[ tlsca_extensions ]
+basicConstraints = CA:true
+keyUsage         = keyCertSign, cRLSign
+subjectKeyIdentifier=hash

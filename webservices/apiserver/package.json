@@ -1,0 +1,70 @@
+{
+  "name": "apiserver",
+  "private": true,
+  "version": "0.0.0",
+  "description": "a Sails application",
+  "keywords": [],
+  "dependencies": {
+    "@sailshq/connect-redis": "^3.2.1",
+    "@sailshq/lodash": "^3.10.3",
+    "@sailshq/socket.io-redis": "^5.2.0",
+    "axios": "^0.19.1",
+    "bcrypt": "^3.0.6",
+    "bcrypt-nodejs": "0.0.3",
+    "celery-node": "^0.3.0",
+    "celery-ts": "^1.1.0",
+    "dateformat": "^3.0.3",
+    "eslint-plugin-react": "^7.18.3",
+    "form-data": "^3.0.0",
+    "image-size": "^0.8.3",
+    "jimp": "^0.10.3",
+    "jsonpath": "^1.1.1",
+    "jsonwebtoken": "^8.5.1",
+    "lusca": "^1.6.1",
+    "node-zip": "github:kyriosli/node-zip",
+    "nodemon": "^2.0.4",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "pbkdf2": "^3.1.1",
+    "pbkdf2-sha256": "^1.1.1",
+    "platform": "^1.3.6",
+    "redis": "^3.0.2",
+    "rimraf": "^3.0.2",
+    "sails": "^1.2.4",
+    "sails-hook-orm": "^2.1.1",
+    "sails-hook-sockets": "^2.0.0",
+    "sails-mongo": "file:../components/sails-mongo",
+    "systeminformation": "^4.24.1"
+  },
+  "devDependencies": {
+    "eslint": "5.16.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-prettier": "^6.5.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.1",
+    "prettier": "^1.19.1"
+  },
+  "scripts": {
+    "dev": "PRIVATEKEY=rsa.private nodemon --inspect-brk app.js",
+    "start": "NODE_ENV=production PRIVATEKEY=rsa.private node app.js --use_strict ",
+    "startDev": "PRIVATEKEY=rsa.private node app.js --use_strict ",
+    "test": "npm run lint && npm run custom-tests && echo 'Done.'",
+    "lint": "./node_modules/eslint/bin/eslint.js . --max-warnings=0 --report-unused-disable-directives && echo '✔  Your .js files look good.'",
+    "custom-tests": "echo \"(No other custom tests yet.)\" && echo"
+  },
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/iesd/apiserver.git"
+  },
+  "author": "iesd",
+  "license": "",
+  "engines": {
+    "node": "^8.11"
+  },
+  "nodemonConfig": {
+    "delay": "5000"
+  }
+}

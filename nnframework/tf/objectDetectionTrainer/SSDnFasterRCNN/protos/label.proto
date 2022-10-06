@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package dls;
+
+message Label {
+    int32 id = 1;
+    string name = 2;
+}
+
+message Item {
+    repeated Label item = 1;    
+}

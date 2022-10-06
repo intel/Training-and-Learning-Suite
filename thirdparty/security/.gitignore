@@ -1,0 +1,8 @@
+*.crt
+*.pem
+*.txt
+*.srl
+*.der
+*.json
+*.ext
+ca
