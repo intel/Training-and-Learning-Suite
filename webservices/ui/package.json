@@ -197,7 +197,7 @@
     "postcss-safe-parser": "^4.0.2",
     "prettier": "^1.19.1",
     "raw-loader": "^3.1.0",
-    "react-dev-utils": "^10.2.1",
+    "react-dev-utils": "^12.0.1",
     "react-error-overlay": "^6.0.7",
     "react-hot-loader": "^4.12.21",
     "redux-immutable-state-invariant": "^2.1.0",
