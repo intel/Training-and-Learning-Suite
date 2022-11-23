@@ -33,7 +33,7 @@
     "rimraf": "^3.0.2",
     "sails": "^1.2.4",
     "sails-hook-orm": "^2.1.1",
-    "sails-hook-sockets": "^2.0.0",
+    "sails-hook-sockets": "^2.0.3",
     "sails-mongo": "file:../components/sails-mongo",
     "systeminformation": "^4.24.1"
   },
