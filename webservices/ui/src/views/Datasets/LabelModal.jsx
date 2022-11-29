@@ -58,7 +58,7 @@ class LabelModal extends React.Component {
   }
 
   render() {
-    const { modal, toggle, mode, submit, showAll } = this.props;
+    const { modal, toggle, mode, submit, eitherOneLabelType } = this.props;
     const { form } = this.state;
 
     const modalTile = 'Add New Label';
@@ -105,6 +105,7 @@ class LabelModal extends React.Component {
                           name="type"
                           value="wholeImg"
                           onChange={this.onChange}
+                          disabled={eitherOneLabelType==="boxImg"}
                         />
                         Whole Image
                       </Label>
@@ -118,7 +119,7 @@ class LabelModal extends React.Component {
                           name="type"
                           value="box"
                           onChange={this.onChange}
-                          disabled={!showAll}
+                          disabled={eitherOneLabelType==="wholeImg"}
                         />
                         Box / Segmentation
                       </Label>

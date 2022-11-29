@@ -355,48 +355,6 @@ module.exports = {
   },
 
   async labelSyncFromCVAT(req, res) {
-    async function _updateCVATLabels(dataset, labels) {
-      let projectdetail = await cvat.request(`/projects/${dataset.projectid}`);
-      let projectlabels = projectdetail.data.labels;
-      let newlabels = [];
-
-      //cvat labels more than project labels
-      if(projectlabels.length > labels.length) {
-        for(var idx in projectlabels) {
-          let lblname = projectlabels[idx].name;
-          let found = labels.find(labelPtr => {
-            return labelPtr.name.replace(`${dataset.id}_`, "") == lblname;
-          });
-          if(found == undefined) {
-            var todelete = projectlabels[idx];
-            todelete['deleted'] = true;
-            newlabels.push(todelete);
-          } else {
-            newlabels.push(projectlabels[idx]);
-          }
-        }
-      } else {
-        for(var idx in labels) {
-          let lblname = labels[idx].name.replace(`${dataset.id}_`, "");
-          let found = projectlabels.find(labelPtr => {
-            return labelPtr.name === lblname;
-          });
-          if (found == undefined) {
-            newlabels.push({ name: lblname, attributes: [] });
-          } else {
-            newlabels.push(found);
-          }
-        }
-      }
-
-      await cvat.request(`/projects/${dataset.projectid}`, {
-        method: "PATCH",
-        data: {
-          labels: newlabels
-        }
-      });
-    }
-
     const datasetId = req.param("datasetId");
 
     const datasetFiles = await Dataset.findOne({
@@ -407,26 +365,26 @@ module.exports = {
       id: datasetId
     }).populate("labels");
 
-    // await _updateCVATLabels(datasetFiles, datasetLabels.labels);
-    
-    // datasetLabels = await Dataset.findOne({
-    //   id: datasetId
-    // }).populate("labels");
-
     var projectId = datasetFiles.projectid;
+    if (projectId == "") {
+      return res.json({ message: "projectid empty" });
+    }
+    
     let projectAnnotations = await cvat.request.get(`/projects/${projectId}/annotations?action=download&format=COCO%201.0&location=local`);
     await delayTime(2500);
     projectAnnotations = await cvat.request.get(`/projects/${projectId}/annotations?action=download&format=COCO%201.0&location=local`);
-    
+
     let payload = projectAnnotations.data.toString();
-    
     if (payload == "") {
-      return res.json({ message: "empty" });
+      return res.json({ message: "annotations empty" });
     } else {
       var bcIndex = payload.indexOf(".json{");
       var ecIndex = payload.search("}PK");
       var slicedPayload = payload.slice(bcIndex+5, ecIndex + 1);
       var parsedPayload = JSON.parse(slicedPayload);
+
+      if(parsedPayload.annotations.length == 0)
+        return res.json({ message: "empty" });
 
       for(var index in datasetFiles.files) {
         await LabelData.destroy({

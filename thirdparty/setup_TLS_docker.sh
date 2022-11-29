@@ -179,11 +179,11 @@ copy_userguide(){
     cp $scriptdir/../doc/*.pdf $scriptdir/../webservices/apiserver/documentation/TLS_2.0_User_Guide.pdf
 }
 
-# copy_userguide
-# check_preinstall_dependencies
-# check_networking
-# check_gitproxy
-# check_install_dependencies
+copy_userguide
+check_preinstall_dependencies
+check_networking
+check_gitproxy
+check_install_dependencies
 check_setup_cvat_docker
 create_tls_datastore
 check_folder_perm

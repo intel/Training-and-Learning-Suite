@@ -46,7 +46,7 @@ class Dataset extends React.Component {
       uploaderModal: false,
       labelModal: false,
       filteredFiles: [],
-      showAllLabelTypes: true,
+      eitherOneLabelType: "all",
       selectedLabels: [],
       manageLabelModal: false,
       assignModal: false,
@@ -79,7 +79,9 @@ class Dataset extends React.Component {
   };
 
   componentDidMount() {
-    const { dispatch, match } = this.props;
+    let self = this;
+    
+    const { dispatch, match, labels } = this.props;
     const datasetId = match.params.id;
 
     dispatch(showAlert(`Updating Images ... Wait about 5 secs`, { variant: 'warning', timeout: 5 }));
@@ -88,7 +90,7 @@ class Dataset extends React.Component {
     }).catch(()=>{}).finally(() => {
       setTimeout(function () {
         dispatch(datasetRetrieve(axios, datasetId));
-      }, 2500)
+      }, 2500);
     });    
   }
 
@@ -97,9 +99,24 @@ class Dataset extends React.Component {
 
     if (changed('files') || changed('labels') || changedTo('datasetStatus', STATUS.SUCCESS)) {
       this.filterFile();
-    }
 
-    
+      let { eitherOneLabelType } = this.state;
+      const { match, labels } = this.props;
+      const datasetId = match.params.id;
+      
+      axios.get(`/api/labelupdate/${datasetId}/`).then(() => {}).catch(()=>{}).finally(() => {
+        if(labels.length > 0) {
+          if(labels[0].type === "wholeImg")
+            eitherOneLabelType = "wholeImg";
+          else
+            eitherOneLabelType = "boxImg";
+        } else {
+          eitherOneLabelType = "all";
+        }
+        console.log(eitherOneLabelType);
+        this.setState({eitherOneLabelType});
+      });
+    }
   }
 
   syncLabels() {
@@ -156,17 +173,22 @@ class Dataset extends React.Component {
     });
   }
 
-  toggleLabelModal(showAll) {
-    const { labelModal } = this.state;
+  toggleLabelModal() {
+    let { labelModal, eitherOneLabelType } = this.state;
+    const { labels } = this.props;
 
-    let showAllLabelTypes = true;
-    if (typeof showAll !== 'undefined') {
-      showAllLabelTypes = showAll;
+    if(labels.length > 0) {
+      if(labels[0].type === "wholeImg")
+        eitherOneLabelType = "wholeImg";
+      else
+        eitherOneLabelType = "boxImg";
+    } else {
+      eitherOneLabelType = "all";
     }
 
     this.setState({
       labelModal: !labelModal,
-      showAllLabelTypes,
+      eitherOneLabelType,
     });
   }
 
@@ -383,7 +405,7 @@ class Dataset extends React.Component {
       uploaderModal,
       labelModal,
       filteredFiles,
-      showAllLabelTypes,
+      eitherOneLabelType,
       selectedLabels,
       manageLabelModal,
       assignModal,
@@ -490,7 +512,8 @@ class Dataset extends React.Component {
                   onSelectImage={this.onSelectImage}
                   onClickThumbnail={index => {
                     const filePtr = files[index];
-                    history.push(`/datasets/${datasetId}/annotation/${filePtr.id}`);
+                    if(eitherOneLabelType === "boxImg")
+                      history.push(`/datasets/${datasetId}/annotation/${filePtr.id}`);
                   }}
                 />
               ) : (
@@ -508,7 +531,7 @@ class Dataset extends React.Component {
           toggle={this.toggleLabelModal}
           modal={labelModal}
           submit={this.submitLabel}
-          showAll={showAllLabelTypes}
+          eitherOneLabelType={eitherOneLabelType}
         />
 
         <UploaderModal
