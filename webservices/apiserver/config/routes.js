@@ -32,8 +32,8 @@
 module.exports.routes = {
   "GET /api/csrfToken": { action: "security/grant-csrf-token" },
   "POST /api/login": { action: "Auth/login", csrf: false },
-  "/api/file/:fileId/cvatsave": "FileController.saveLabelFromCVAT",
-  "GET /api/filesync/:datasetId/save": "FileController.saveAllLabelFromCVAT",
+  "GET /api/labelsync/:datasetId" : "FileController.labelSyncFromCVAT",
+  "GET /api/labelupdate/:datasetId" : "FileController.updateCVATLabels",
   "/api/file/:fileId/cvat": "FileController.getCVATTask",
   "POST /api/dataset/:datasetId/upload": "FileController.upload",
   "/api/dataset/:datasetId/file/:id": {

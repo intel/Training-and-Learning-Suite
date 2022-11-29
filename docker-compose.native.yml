@@ -24,7 +24,7 @@ services:
   tls_redis:
     image: redis-tls:2.0
     container_name: tls_redis
-    read_only: true
+    read_only: false
     build:
       context: .
       dockerfile: tlsredis.Dockerfile
@@ -48,9 +48,9 @@ services:
       - redis_pass
 
   tls_mongo:
-    image: mongo:4.0
+    image: mongo:4.4
     container_name: tls_mongo
-    read_only: true
+    read_only: false
     volumes:
       - mongo_tmp:/tmp
       - mongo_data:/data/db
@@ -63,9 +63,10 @@ services:
     security_opt:
       - no-new-privileges
     command:
-      - "--sslMode=allowSSL"
-      - "--sslPEMKeyFile=/run/secrets/mongodb_key"
-      - "--sslCAFile=/run/secrets/ca_tls"
+      - "--tlsMode=allowTLS"
+      - "--tlsCertificateKeyFile=/run/secrets/mongodb_key"
+      - "--tlsCAFile=/run/secrets/ca_tls"
+      - "--tlsAllowConnectionsWithoutCertificates"
     environment:
       - MONGO_INITDB_DATABASE=tls20
       - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongodb_user
@@ -79,7 +80,7 @@ services:
   tls_rabbitmq:
     image: tls_rabbitmq-mqtt:2.0
     container_name: tls_rabbitmq
-    read_only: true
+    read_only: false
     ports:
       - "1883:1883"
       - "8883:8883"
@@ -104,7 +105,7 @@ services:
       - tls_mongo
       - tls_redis
       - tls_rabbitmq
-    read_only: true
+    read_only: false
     build:
       context: .
       dockerfile: tlsproxy.Dockerfile
@@ -118,9 +119,9 @@ services:
       - proxy_tmp:/tmp
     networks:
       - default
-      - cvat_default
+      - cvat_cvat
     environment:
-      - CVAT_URL=http://cvat:8080
+      - CVAT_URL=http://172.17.0.1:8080
       - TLS_API_URL=https://172.17.0.1:1337
       - TLS_UI_URL=http://172.17.0.1:3000
     secrets:
@@ -129,7 +130,7 @@ services:
       - tlsserver_key
 
   tls_openvino:
-    image: openvino/ubuntu18_dev:2020.2
+    image: openvino/ubuntu18_dev:2021.4.2
     container_name: tls_openvino
     read_only: true
     security_opt:
@@ -139,10 +140,6 @@ services:
 
 volumes:
   openvino:
-    driver_opts:
-      type: none
-      o: bind
-      device: /opt/intel/openvino
   proxy_tmp:
     driver_opts:
       type: none
@@ -190,7 +187,7 @@ volumes:
       device: /opt/intel/tls/tmp
 
 networks:
-  cvat_default:
+  cvat_cvat:
     external: true
 
 secrets:

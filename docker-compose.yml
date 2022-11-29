@@ -110,7 +110,7 @@ services:
     container_name: tls_proxy
     depends_on:
       - tls_apiui
-      - tls_core
+      # - tls_core
     read_only: true
     build:
       context: .

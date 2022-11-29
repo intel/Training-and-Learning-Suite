@@ -98,7 +98,6 @@ check_gitproxy () {
 check_setup_tls_docker() {
     cd $scriptdir/.. 
     sudo -E docker-compose build
-    sudo -E docker exec -it cvat bash -c "python3 ~/manage.py shell -c 'from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser("'"admin"'", "'"admin@mail.com"'",  "'"password"'")'"
     sudo -E docker-compose up -d
 }
 
@@ -115,13 +114,22 @@ cat << EOF >> ./cvat-ui/src/styles.scss
     visibility: hidden;
     height: 0px;
 }
+
+.ant-layout-header.cvat-annotation-header {
+	visibility: hidden;
+	height: 0px;
+}
 EOF
 
+	sed -i "s/node:lts-slim/node:16.18.1-slim/" Dockerfile.ui
+	sed -i "s/openvino\/cvat_server/openvino\/cvat_server:v2.0.0/" docker-compose.yml
 
     export CVAT_HOST=traefik
-    sudo -E docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+    sudo -E docker-compose -f docker-compose.yml -f docker-compose.dev.yml build cvat_ui
     sudo -E docker-compose up -d
-    #sleep 10
+    echo "Waiting for CVAT to be ready ..."
+	sleep 60
+	sudo -E docker exec -it cvat bash -c "python3 ~/manage.py shell -c 'from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser("'"admin"'", "'"admin@mail.com"'",  "'"password"'")'"
 }
 
 create_tls_datastore() {
@@ -171,14 +179,14 @@ copy_userguide(){
     cp $scriptdir/../doc/*.pdf $scriptdir/../webservices/apiserver/documentation/TLS_2.0_User_Guide.pdf
 }
 
-copy_userguide
-check_preinstall_dependencies
-check_networking
-check_gitproxy
-check_install_dependencies
+# copy_userguide
+# check_preinstall_dependencies
+# check_networking
+# check_gitproxy
+# check_install_dependencies
 check_setup_cvat_docker
 create_tls_datastore
 check_folder_perm
 check_setup_tls_docker
 
-echo "Setup Completed. Please proceed to https://<system ip> in remote browser"
+echo "Setup Completed. Please reboot your system before proceed to https://<system_ip> in your browser"

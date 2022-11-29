@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM ubuntu:bionic
+FROM ubuntu:focal
 
 ARG http_proxy
 ARG https_proxy
@@ -36,14 +36,14 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LANG='C.UTF-8'  \
     LC_ALL='C.UTF-8'
 
-RUN apt-get update -qq && apt-get install -y -qq wget curl git
+RUN apt-get update -qq && apt-get install -y -qq wget curl git python2
 RUN git config --global url."git@github.com:".insteadOf "https://github.com/"			
 RUN	git config --global url."https://github.com/".insteadOf "git://github.com/"
 RUN git config --global http.postBuffer 524288000
 
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt update && apt install -y nodejs build-essential
-RUN npm install -g serve
+RUN npm install -g serve npm@latest
 
 ENV USER=${user}
 ENV HOME /home/${user}
@@ -57,12 +57,6 @@ RUN mv wait-for-it.sh /usr/bin/
 RUN chmod +x /usr/bin/wait-for-it.sh
 
 RUN chown -R ${user}:${user} ${HOME}
-
-# RUN mkdir -p ${HOME}/webservices/components \
-#     && cd ${HOME}/webservices/components \
-#     && git clone https://github.com/opencv/cvat.git \
-#     && cd cvat \
-#     && git checkout feebec2670186f8f56f4314cb45d596d5dc13e8a
 
 RUN mkdir -p ${HOME}/webservices/components \
     && cd ${HOME}/webservices/components \
@@ -83,7 +77,7 @@ RUN cd ${HOME}/webservices/apiserver \
     && npm install jsonpath
 
 RUN cd ${HOME}/webservices/ui \
-    && npm install 
+    && npm install
 
 #Removing build dependencies
 RUN apt-get remove -y wget && \

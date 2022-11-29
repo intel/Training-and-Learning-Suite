@@ -34,7 +34,7 @@ class CVATEmbedded extends React.Component {
     super(props);
 
     this.state = {
-      width: 1920,
+      width: '100%',
       height: 1080,
       key: uuidv1(),
       ratio: 1,
@@ -91,7 +91,7 @@ class CVATEmbedded extends React.Component {
   onIframeEvent(event) {
     if (event.key == "s") {
       const { fileId } = this.props;
-      Axios.post(`/api/file/${fileId}/cvatsave`).then(() => { }).catch(() => { });
+      const { taskId } = this.state;
     }
   }
 
@@ -143,7 +143,7 @@ class CVATEmbedded extends React.Component {
       return <Loader block />;
     }
     return (
-      <div ref={this.containerRef} style={{ height }}>
+      <div ref={this.containerRef} style={{ height, width }}>
         <iframe
           id="cvatframe"
           key={key}

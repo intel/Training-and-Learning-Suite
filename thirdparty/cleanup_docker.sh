@@ -20,13 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+docker stop `docker ps -qa`
+
 docker rm -vf $(docker ps --filter name=tls* --filter name=cvat* -a -q)
 
 docker rmi -f $(docker images --filter=reference="cvat*" \
 		--filter=reference="*tls*" -a -q)
 
 docker volume rm $(docker volume ls -q --filter name="cvat*" \
-			--filter name="training-learning-suite*")
+			--filter name="training-and-learning-suite*")
 
-docker system prune
-docker volume prune
+docker system prune -a

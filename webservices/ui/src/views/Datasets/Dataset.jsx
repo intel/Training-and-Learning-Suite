@@ -82,10 +82,14 @@ class Dataset extends React.Component {
     const { dispatch, match } = this.props;
     const datasetId = match.params.id;
 
-    dispatch(showAlert(`Updating Images ... Wait about 5 secs`, { variant: 'warning', timeout: 10 }));
-    setTimeout(function () {
-      dispatch(datasetRetrieve(axios, datasetId));
-    }, 2500)
+    dispatch(showAlert(`Updating Images ... Wait about 5 secs`, { variant: 'warning', timeout: 5 }));
+    axios.get(`/api/labelsync/${datasetId}/`).then(() => {
+
+    }).catch(()=>{}).finally(() => {
+      setTimeout(function () {
+        dispatch(datasetRetrieve(axios, datasetId));
+      }, 2500)
+    });    
   }
 
   componentDidUpdate(prevProps) {
@@ -94,6 +98,8 @@ class Dataset extends React.Component {
     if (changed('files') || changed('labels') || changedTo('datasetStatus', STATUS.SUCCESS)) {
       this.filterFile();
     }
+
+    
   }
 
   syncLabels() {
@@ -120,14 +126,14 @@ class Dataset extends React.Component {
         dataset: datasetId,
       })
       .then(() => {
+        axios.get(`/api/labelupdate/${datasetId}/`).then(() => {}).catch(()=>{}).finally(() => {
+          dispatch(datasetRetrieve(axios, datasetId));
+        });
         this.toggleLabelModal();
-
-        dispatch(datasetRetrieve(axios, datasetId));
       })
       .catch(err => {
         if (err.response.data.code === 'E_UNIQUE') {
           dispatch(showAlert('The label name already exists', { variant: 'warning' }));
-
           return;
         }
         dispatch(showAlert('Failed to create label', { variant: 'danger' }));
@@ -520,7 +526,9 @@ class Dataset extends React.Component {
           modal={manageLabelModal}
           labels={labels}
           onComplete={() => {
-            dispatch(datasetRetrieve(axios, datasetId));
+            axios.get(`/api/labelupdate/${datasetId}/`).then(() => {}).catch(()=>{}).finally(() => {
+              dispatch(datasetRetrieve(axios, datasetId));
+            });
           }}
           toggle={this.toggleManageLabelModal}
           axios={axios}
