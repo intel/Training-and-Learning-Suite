@@ -41,7 +41,7 @@
     "mathjs": "7.0.1",
     "mobile-detect": "1.4.4",
     "modernizr": "3.11.2",
-    "moment": "2.26.0",
+    "moment": "2.29.4",
     "namor": "2.0.2",
     "nanoid": "2.1.11",
     "node-celery": "0.2.8",
