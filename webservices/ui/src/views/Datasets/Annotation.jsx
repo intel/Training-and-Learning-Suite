@@ -46,7 +46,6 @@ class Annotation extends React.Component {
 
     this.formatGalleryImageOption = this.formatGalleryImageOption.bind(this);
     this.imageClicked = this.imageClicked.bind(this);
-    this.saveLastImage = this.saveLastImage.bind(this);
   }
 
   static propTypes = {
@@ -81,16 +80,7 @@ class Annotation extends React.Component {
     dispatch(datasetRetrieve(Axios, datasetId));
   }
 
-  saveLastImage() {
-    const { files } = this.props;
-    const { index } = this.state;
-    if (index != -1) {
-      Axios.post(`/api/file/${files[index].id}/cvatsave`).then(() => { }).catch(() => { });
-    }
-  }
-
   imageClicked(event, cindex) {
-    this.saveLastImage();
     this.setState({ index: cindex });
   }
 
@@ -123,7 +113,6 @@ class Annotation extends React.Component {
               <Button
                 color="primary"
                 onClick={() => {
-                  this.saveLastImage();
                   history.push(`/datasets/${datasetId}`);
                 }}
               >

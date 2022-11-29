@@ -23,7 +23,10 @@
 check_install_dependencies() {
     echo "Setup Dependencies & Repositories"
     sudo -E apt update
-    sudo -E apt install -y nodejs npm
+    sudo -E apt install -y wget curl build-essential
+    sudo curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
+    sudo -E apt install -y nodejs
+    sudo -E npm install npm@latest -g
     sudo -E npm install --save pbkdf2-sha256
 }
 

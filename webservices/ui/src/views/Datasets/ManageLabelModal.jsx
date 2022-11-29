@@ -38,7 +38,6 @@ class ManageLabelModal extends React.Component {
 
   deleteLabel(id) {
     const { axios, onComplete } = this.props;
-
     axios.delete(`/api/label/${id}`).then(() => {
       onComplete();
     });

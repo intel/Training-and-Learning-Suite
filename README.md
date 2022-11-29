@@ -24,14 +24,7 @@
       sudo ./cleanup_docker.sh
       ```
 
-3. **[Note]** If the system is previously installed with mongodb, redis, and mosquitto, it is advisable to `stop` these services using the command below:
-
-      ```
-      cd <training_and_learning_suite_2.0_repo>/thirdparty
-
-      sudo ./cleanup.sh
-      ```
-4. `Optional` If the network of the system is running behind proxy, please configure the proxy for both http and https:
+3. `Optional` If the network of the system is running behind proxy, please configure the proxy for both http and https:
 
       ```
       export http_proxy=http://<user.pass>@<company>:<server_port> 

@@ -36,7 +36,6 @@ import {
 } from 'reactstrap';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import HorizontalScroller from 'react-horizontal-scroll-container';
 import Axios from '../../../ApiToken';
 import { Range } from 'rc-slider';
 import PropTypes from 'prop-types';
@@ -187,7 +186,7 @@ class DatasetSelection extends React.Component {
     }
 
     return (
-      <Col md="6" key={datasetPtr.id}>
+      <Col md="4" key={datasetPtr.id}>
         <Card body outline color="primary" className="card-stats mb-4 mb-xl-0">
           <CardHeader>
             <CardTitle>
@@ -332,9 +331,9 @@ class DatasetSelection extends React.Component {
                 </div>
               </CardTitle>
               <CardBody>
-                <HorizontalScroller>
+                <div style={{ width: "100%", overflow: "auto", display: "flex" }}>
                   {datasets.map(datasetPtr => this.renderDatasetCard(datasetPtr))}
-                </HorizontalScroller>
+                </div>
               </CardBody>
             </Card>
           </Col>

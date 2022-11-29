@@ -23,7 +23,6 @@ const url = require("url");
 const cvatCore = {};
 
 let backendAPI = process.env.CVAT_URL || "http://localhost:8080/api";
-console.log(backendAPI);
 
 const username = "admin";
 const password = "password";
@@ -59,8 +58,6 @@ async function getAuthenticationToken() {
   const token = authenticationResponse.data.key;
   instance.defaults.headers.common.Authorization = `Token ${token}`;
 }
-
-// cvatCore.config.backendAPI = backendAPI;
 
 module.exports.cvat = {
   request: instance,
