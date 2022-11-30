@@ -46,7 +46,7 @@ class Dataset extends React.Component {
       uploaderModal: false,
       labelModal: false,
       filteredFiles: [],
-      eitherOneLabelType: "all",
+      eitherOneLabelType: "empty",
       selectedLabels: [],
       manageLabelModal: false,
       assignModal: false,
@@ -113,7 +113,7 @@ class Dataset extends React.Component {
         } else {
           eitherOneLabelType = "all";
         }
-        console.log(eitherOneLabelType);
+
         this.setState({eitherOneLabelType});
       });
     }
@@ -174,21 +174,9 @@ class Dataset extends React.Component {
   }
 
   toggleLabelModal() {
-    let { labelModal, eitherOneLabelType } = this.state;
-    const { labels } = this.props;
-
-    if(labels.length > 0) {
-      if(labels[0].type === "wholeImg")
-        eitherOneLabelType = "wholeImg";
-      else
-        eitherOneLabelType = "boxImg";
-    } else {
-      eitherOneLabelType = "all";
-    }
-
+    let { labelModal } = this.state;
     this.setState({
-      labelModal: !labelModal,
-      eitherOneLabelType,
+      labelModal: !labelModal
     });
   }
 

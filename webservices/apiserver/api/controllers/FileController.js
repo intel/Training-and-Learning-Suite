@@ -310,7 +310,9 @@ module.exports = {
 
     let dataset = datasetLabels;
     let labels = datasetLabels.labels;
-
+    if (dataset.projectid==""){
+      return res.json({message:"empty"});
+    }
     let projectdetail = await cvat.request(`/projects/${dataset.projectid}`);
     let projectlabels = projectdetail.data.labels;
     let newlabels = [];

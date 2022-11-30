@@ -105,7 +105,7 @@ class LabelModal extends React.Component {
                           name="type"
                           value="wholeImg"
                           onChange={this.onChange}
-                          disabled={eitherOneLabelType==="boxImg"}
+                          disabled={eitherOneLabelType==="boxImg" || eitherOneLabelType==="empty"}
                         />
                         Whole Image
                       </Label>
@@ -119,7 +119,7 @@ class LabelModal extends React.Component {
                           name="type"
                           value="box"
                           onChange={this.onChange}
-                          disabled={eitherOneLabelType==="wholeImg"}
+                          disabled={eitherOneLabelType==="wholeImg" || eitherOneLabelType==="empty"}
                         />
                         Box / Segmentation
                       </Label>
