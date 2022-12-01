@@ -36,7 +36,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LANG='C.UTF-8'  \
     LC_ALL='C.UTF-8'
 
-RUN apt-get update -qq && apt-get install -y -qq wget curl git python2
+RUN apt-get update -qq && apt-get install -y -qq wget curl git
 RUN git config --global url."git@github.com:".insteadOf "https://github.com/"			
 RUN	git config --global url."https://github.com/".insteadOf "git://github.com/"
 RUN git config --global http.postBuffer 524288000
