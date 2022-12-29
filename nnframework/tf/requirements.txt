@@ -19,5 +19,5 @@ h5py==2.10.0
 tqdm==4.51.0
 pathos==0.2.9
 protobuf==3.19.0
-Pillow==6.2.2
+Pillow==9.3.0
 importlib-metadata==4.13.0
